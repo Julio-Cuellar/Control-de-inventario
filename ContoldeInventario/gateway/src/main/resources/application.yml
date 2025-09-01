@@ -1,0 +1,38 @@
+server:
+  port: 8080   # Puerto del Gateway
+
+spring:
+  application:
+    name: gateway
+
+  cloud:
+    config:
+      uri: http://localhost:8888   # Dirección del Config Server
+      fail-fast: true              # Si falla al conectarse, vuelve a intentar
+    gateway:
+      discovery:
+        locator:
+          enabled: true            # Habilita la detección automática en Eureka
+          lower-case-service-id: true  # Usa nombres en minúscula para los servicios
+      routes:
+        - id: user-service
+          uri: lb://user-service   # "lb://" usa el balanceo de carga con Eureka
+          predicates:
+            - Path=/users/**       # Se enruta cuando el path comience con /users/
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/products/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/   # Dirección del Discovery Server
+  instance:
+    prefer-ip-address: true
